@@ -29,9 +29,6 @@
     text-align: center;
     outline: none !important;
     border: none;
-    -webkit-transition: all 0.4s;
-       -moz-transition: all 0.4s;
-            transition: all 0.4s;
   }
   .toolbar-input:hover {
     background-color: rgba(255, 250, 240, .95);
@@ -101,6 +98,12 @@
     opacity: .5;
   }
 
+  .toolbar-input, .layer-preview {
+    -webkit-transition: all 0.4s;
+       -moz-transition: all 0.4s;
+            transition: all 0.4s;
+  }
+
   .layer-0 { color: Tomato; }
   .layer-1 { color: Teal; }
   .layer-2 { color: MediumSlateBlue; }
@@ -145,14 +148,7 @@
       </form>
     </div>
 
-    <div id="panel-right" class="panel-right">
-      <!--ol class="layers-panel">
-        <li class="layer-preview-item">
-          <a class="layer-preview layer-1" href="#">O</a></li>
-        <li class="layer-preview-item">
-          <a class="layer-preview layer-0" href="#">H</a></li>
-      </ol-->
-    </div>
+    <div id="panel-right" class="panel-right"></div>
 
     <div class="content">
       <div id="content-letters" class="content-letters"></div>
