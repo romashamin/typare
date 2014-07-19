@@ -146,12 +146,12 @@
     </div>
 
     <div id="panel-right" class="panel-right">
-      <ol class="layers-panel">
+      <!--ol class="layers-panel">
         <li class="layer-preview-item">
           <a class="layer-preview layer-1" href="#">O</a></li>
         <li class="layer-preview-item">
           <a class="layer-preview layer-0" href="#">H</a></li>
-      </ol>
+      </ol-->
     </div>
 
     <div class="content">
@@ -176,6 +176,39 @@ var DOM = (function() {
 })();
 
 
+var helpers = (function() {
+
+  var isArray = function(o) {
+    return Object.prototype.toString.call(o) === '[object Array]';
+  }
+
+  var wrapStrInTag = function(str, tag, options) {
+    var
+      tagOpenBegin = '<' + tag,
+      tagOpenEnd   = '>',
+      tagEnd       = '</' + tag + '>',
+      htmlStr      = '' + tagOpenBegin,
+      concatWithSpace, keyPropToStr;
+
+    concatWithSpace = function(a, b) { return a + ' ' + b }
+
+    keyPropToStr = function(k, p) {
+      var p_str = isArray(p) ? p.reduce(concatWithSpace) : p;
+      return ' ' + k + '="' + p_str + '"'
+    }
+
+    for (key in options) htmlStr += keyPropToStr(key, options[key])
+
+    return htmlStr += tagOpenEnd + str + tagEnd
+  }
+
+  return {
+    isArray      : isArray,
+    wrapStrInTag : wrapStrInTag
+  }
+})();
+
+
 var app = (function() {
 
 
@@ -189,18 +222,13 @@ var app = (function() {
 
   lettersToHtml = function(letterString) {
     var
-      htmlString = '',
-      letterHtml = {
-        openTag:   '<span id="layer-',
-        classBegin: '" class="content-letter layer-',
-        classEnd: '">',
-        closeTag:  '</span>'
-      };
+      htmlString = '';
 
     for (var i = 0, l = letterString.length; i < l; i++) {
-      htmlString += letterHtml.openTag + i
-        + letterHtml.classBegin + i + letterHtml.classEnd
-        + letterString[i] + letterHtml.closeTag;
+      htmlString += helpers.wrapStrInTag(letterString[i], 'span', {
+        id: 'layer-' + i,
+        class: [ 'content-letter', 'layer-' + i ]
+      })
     }
 
     return htmlString;
