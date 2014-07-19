@@ -5,10 +5,18 @@
   <title>Typare — compare glyphs to explore typefaces</title>
 <style type="text/css">
   html, body, .wrapper { height: 100%; }
-  body, .toolbar-form, .toolbar-form-fieldset, .toolbar-input
+  body, .toolbar-form, .toolbar-form-fieldset, .toolbar-input, .author,
+  .panel-right, .layers-panel, .layer-preview
     { margin: 0; padding: 0; }
 
-  body { font-family: Times; text-rendering: geometricPrecision; }
+  body {
+    color: Coral;
+    font-family: Times;
+    text-rendering: geometricPrecision;
+  }
+
+  .clfx:before, .clfx:after { content: " "; display: table; }
+  .clfx:after { clear: both; }
 
   .toolbar { position: fixed; width: 100%; z-index: 100; }
   .toolbar-form, .toolbar-form-fieldset { text-align: center; border: none; }
@@ -16,7 +24,7 @@
     padding: 20px 5px;
     font-family: inherit;
     font-size: 18px;
-    color: Coral;
+    color: inherit;
     background-color: rgba(255, 255, 255, .75);
     text-align: center;
     outline: none !important;
@@ -26,8 +34,8 @@
             transition: all 0.4s;
   }
   .toolbar-input:hover {
-    background-color: FloralWhite;
-    color: Coral;
+    background-color: rgba(255, 250, 240, .95);
+    color: inherit;
   }
   .toolbar-input:active,
   .toolbar-input:focus {
@@ -39,6 +47,38 @@
   }
   .toolbar-input:focus::-webkit-input-placeholder {
     color: white;
+  }
+
+  .panel-right {
+    display: table;
+    position: fixed;
+    width:  60px;
+    top:    80px;
+    right:  0;
+    bottom: 80px;
+    margin-top: auto;
+    margin-bottom: auto;
+    z-index: 101;
+  }
+  .layers-panel {
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .layer-preview-item {
+    float: left;
+    list-style-type: none;
+    text-align: center;
+  }
+  .layer-preview {
+    display: block;
+    width:  60px;
+    padding: 20px 0;
+    color: inherit;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, .75);
+  }
+  .layer-preview:hover {
+    background-color: rgba(255, 250, 240, .95);
   }
 
   .content {
@@ -55,31 +95,29 @@
     width: 100%;
     position: absolute;
     left: 50%;
-    top: 10%;
+    top:  10%;
     margin-left: -50%;
     text-align: center;
     opacity: .5;
   }
 
-  #layer-0 { color: Tomato; }
-  #layer-1 { color: Teal; }
-  #layer-2 { color: MediumSlateBlue; }
-  #layer-3 { color: LimeGreen; }
-  #layer-4 { color: RoyalBlue; }
-  #layer-5 { color: DarkGoldenRod; }
-  #layer-6 { color: DarkSeaGreen; }
-  #layer-7 { color: HotPink; }
-  #layer-8 { color: YellowGreen; }
-  #layer-9 { color: LightSlateGray; }
+  .layer-0 { color: Tomato; }
+  .layer-1 { color: Teal; }
+  .layer-2 { color: MediumSlateBlue; }
+  .layer-3 { color: LimeGreen; }
+  .layer-4 { color: RoyalBlue; }
+  .layer-5 { color: DarkGoldenRod; }
+  .layer-6 { color: DarkSeaGreen; }
+  .layer-7 { color: HotPink; }
+  .layer-8 { color: YellowGreen; }
+  .layer-9 { color: LightSlateGray; }
 
   .author {
     position: fixed;
-    margin: 0;
-    padding: 0;
     bottom: 10px;
-    right: 10px;
+    right:  10px;
     font-size: 13px;
-    color: Coral;
+    color: inherit;
     text-decoration: none;
   }
   .author:hover { color: Tomato; }
@@ -88,6 +126,7 @@
 </head>
 <body>
   <div id="wrapper" class="wrapper">
+
     <div class="toolbar">
       <form class="toolbar-form">
         <fieldset class="toolbar-form-fieldset">
@@ -105,9 +144,20 @@
         </fieldset>
       </form>
     </div>
+
+    <div id="panel-right" class="panel-right">
+      <ol class="layers-panel">
+        <li class="layer-preview-item">
+          <a class="layer-preview layer-1" href="#">O</a></li>
+        <li class="layer-preview-item">
+          <a class="layer-preview layer-0" href="#">H</a></li>
+      </ol>
+    </div>
+
     <div class="content">
       <div id="content-letters" class="content-letters"></div>
     </div>
+
     <a
       class="author"
       href="https://twitter.com/romanshamin"
@@ -142,14 +192,15 @@ var app = (function() {
       htmlString = '',
       letterHtml = {
         openTag:   '<span id="layer-',
-        classPart: '" class="content-letter">',
+        classBegin: '" class="content-letter layer-',
+        classEnd: '">',
         closeTag:  '</span>'
       };
 
     for (var i = 0, l = letterString.length; i < l; i++) {
       htmlString += letterHtml.openTag + i
-        + letterHtml.classPart + letterString[i]
-        + letterHtml.closeTag;
+        + letterHtml.classBegin + i + letterHtml.classEnd
+        + letterString[i] + letterHtml.closeTag;
     }
 
     return htmlString;
