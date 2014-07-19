@@ -244,9 +244,9 @@ var app = (function() {
   updateLayersPanel = function(letters) {
     var html = '';
 
-    letters = letters.split('').reverse().join('');
+    //letters = letters.split('').reverse().join('');
 
-    for (var i = 0, l = letters.length; i < l; i++)
+    for (var i = letters.length - 1; i >= 0; i--)
       html += helpers.wrapStrInTag(
         helpers.wrapStrInTag(
           letters[i], 'a', {
