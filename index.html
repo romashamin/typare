@@ -217,7 +217,8 @@ var app = (function() {
       defFontName: 'Times',
       defLetters:  'HO'
     },
-    init, lettersToHtml, updateFontFaceStyle, updateLetters;
+    init, lettersToHtml, updateFontFaceStyle, updateLetters,
+    updateLayersPanel;
 
 
   lettersToHtml = function(letterString) {
@@ -240,9 +241,33 @@ var app = (function() {
   }
 
 
+  updateLayersPanel = function(letters) {
+    var html = '';
+
+    letters = letters.split('').reverse().join('');
+
+    for (var i = 0, l = letters.length; i < l; i++)
+      html += helpers.wrapStrInTag(
+        helpers.wrapStrInTag(
+          letters[i], 'a', {
+            id: 'layer-preview-' + i,
+            class: ['layer-preview', 'layer-' + i],
+            href: '#' }),
+        'li', { class: 'layer-preview-item' })
+
+    html = helpers.wrapStrInTag(html, 'ol', { class: 'layers-panel' });
+
+    DOM.id('#panel-right').innerHTML = html;
+  }
+
+
   updateLetters = function() {
+    var letters = DOM.id('#input-letters').value;
+
     DOM.id('#content-letters').innerHTML =
-      lettersToHtml(DOM.id('#input-letters').value);
+      lettersToHtml(letters);
+
+    updateLayersPanel(letters);
   }
 
 
@@ -251,6 +276,7 @@ var app = (function() {
     DOM.id('#input-letters').value = config.defLetters;
 
     DOM.id('#content-letters').innerHTML = lettersToHtml(config.defLetters);
+    updateLayersPanel(config.defLetters);
 
     DOM.id('#input-font-name').addEventListener('input', updateFontFaceStyle);
     DOM.id('#input-letters').addEventListener('input', updateLetters);
