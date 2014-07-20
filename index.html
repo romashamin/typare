@@ -174,7 +174,9 @@ var DOM = (function() {
 
 var helpers = (function() {
 
-  var isArray, wrapStrInTag, addEventListeners, removeEventListeners;
+  var
+    isArray, wrapStrInTag, makeEventListeners,
+    addEventListeners, removeEventListeners;
 
 
   isArray = function(o) {
@@ -203,26 +205,25 @@ var helpers = (function() {
   }
 
 
-  addEventListeners = function(id_prefix, letters, f) {
-    for (var i = 0, l = letters.length; i < l; i++) {
-      (function() {
-        var letter = letters[i];
-        document.querySelector('#' + id_prefix + i).
-          addEventListener('click', function(){ f(letter) });
-      })();
+  makeEventListeners = function(action) {
+    return function(id_prefix) {
+      return function(n, f) {
+        for (var i = 0; i < n; i++) {
+          (function() {
+            var layer_num = i;
+            action.call(document.querySelector('#' + id_prefix + i),
+              'click', function(){ f(layer_num) });
+          })();
+        }
+      }
     }
   }
 
+  addEventListeners = makeEventListeners(
+    Document.prototype.addEventListener)('layer-preview-');
 
-  removeEventListeners = function(id_prefix, letters, f) {
-    for (var i = 0, l = letters.length; i < l; i++) {
-      (function() {
-        var letter = letters[i];
-        document.querySelector('#' + id_prefix + i).
-          removeEventListener('click', function(){ f(letter) });
-      })();
-    }
-  }
+  removeEventListeners = makeEventListeners(
+    Document.prototype.removeEventListener)('layer-preview-');
 
 
   return {
@@ -244,7 +245,7 @@ var app = (function() {
       currentLayers: ''
     },
     init, lettersToHtml, updateFontFaceStyle, updateLetters,
-    updateLayersPanel, proc;
+    updateLayersPanel, layerClickListener;
 
 
   lettersToHtml = function(letters) {
@@ -285,8 +286,8 @@ var app = (function() {
   }
 
 
-  proc = function(letter) {
-    console.log('Click on ' + letter)
+  layerClickListener = function(layer_num) {
+    console.log('Click on ' + layer_num)
   }
 
 
@@ -296,11 +297,13 @@ var app = (function() {
     DOM.id('#content-letters').innerHTML =
       lettersToHtml(letters);
 
-    helpers.removeEventListeners('layer-preview-', config.currentLayers, proc);
+    helpers.removeEventListeners(config.currentLayers.length,
+      layerClickListener);
     DOM.id('#panel-right').innerHTML =
       updateLayersPanel(letters);
     config.currentLayers = letters;
-    helpers.addEventListeners('layer-preview-', config.currentLayers, proc);
+    helpers.addEventListeners(letters.length,
+      layerClickListener);
   }
 
 
@@ -314,7 +317,7 @@ var app = (function() {
     DOM.id('#panel-right').innerHTML =
       updateLayersPanel(config.defLetters);
     config.currentLayers = config.defLetters;
-    helpers.addEventListeners('layer-preview-', config.defLetters, proc)
+    helpers.addEventListeners(config.defLetters.length, layerClickListener)
 
     DOM.id('#input-font-name').addEventListener(
       'input', updateFontFaceStyle);
