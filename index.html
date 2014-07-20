@@ -77,6 +77,13 @@
   .layer-preview:hover {
     background-color: rgba(255, 250, 240, .95);
   }
+  .picked-layer {
+    background-color: Coral;
+    color: white !important;
+  }
+  .picked-layer:hover {
+    background-color: rgba(255, 127, 80, .8) !important;
+  }
 
   .content {
     height: 100%;
@@ -176,7 +183,7 @@ var helpers = (function() {
 
   var
     isArray, wrapStrInTag, makeEventListeners,
-    addEventListeners, removeEventListeners;
+    addEventListeners, removeEventListeners, toggleClass;
 
 
   isArray = function(o) {
@@ -226,11 +233,29 @@ var helpers = (function() {
     Document.prototype.removeEventListener)('layer-preview-');
 
 
+  toggleClass = function(element, className) {
+    if (!element || !className) return;
+
+    var
+      classString = element.className,
+      nameIndex = classString.indexOf(className);
+
+    if (nameIndex === -1)
+      classString += ' ' + className;
+    else
+      classString = classString.substr(0, nameIndex) +
+        classString.substr(nameIndex + className.length);
+
+    element.className = classString;
+  }
+
+
   return {
     isArray              : isArray,
     wrapStrInTag         : wrapStrInTag,
     addEventListeners    : addEventListeners,
-    removeEventListeners : removeEventListeners
+    removeEventListeners : removeEventListeners,
+    toggleClass          : toggleClass
   }
 })();
 
@@ -240,9 +265,11 @@ var app = (function() {
 
   var
     config = {
-      defFontName: 'Times',
-      defLetters:  'HO',
-      currentLayers: ''
+      defFontName      : 'Times',
+      defLetters       : 'HO',
+      currentLayers    : '',
+      pickedLayerNum   : -1,
+      pickedLayerClass : 'picked-layer'
     },
     init, lettersToHtml, updateFontFaceStyle, updateLetters,
     updateLayersPanel, layerClickListener;
@@ -287,7 +314,19 @@ var app = (function() {
 
 
   layerClickListener = function(layer_num) {
-    console.log('Click on ' + layer_num)
+    helpers.toggleClass(
+      document.querySelector('#layer-preview-' + layer_num),
+      config.pickedLayerClass);
+
+    if (config.pickedLayerNum === layer_num)
+      config.pickedLayerNum = -1;
+    else {
+      if (config.pickedLayerNum >= 0)
+        helpers.toggleClass(
+          document.querySelector('#layer-preview-' + config.pickedLayerNum),
+          config.pickedLayerClass);
+      config.pickedLayerNum = layer_num;
+    }
   }
 
 
