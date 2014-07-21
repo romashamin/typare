@@ -96,16 +96,19 @@
     font-size: 540px;
   }
   .content-letter {
-    width: 100%;
     position: absolute;
-    left: 50%;
+    left: 0;
     top:  10%;
-    margin-left: -50%;
-    text-align: center;
     opacity: .5;
   }
   .picked-letter {
     z-index: 1 !important;
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+  }
+  .grabbing {
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
   }
 
   .toolbar-input, .layer-preview {
@@ -172,8 +175,11 @@
 
 <script type="text/javascript">
 
+var DOM, helpers, app;
 
-var DOM = (function() {
+
+
+DOM = (function() {
   var id = function(s) {
     if (!id.storage) id.storage = {};
     return id.storage[s] = id.storage[s] || document.querySelector(s);
@@ -182,7 +188,8 @@ var DOM = (function() {
 })();
 
 
-var helpers = (function() {
+
+helpers = (function() {
 
   var
     isArray, wrapStrInTag, makeEventListeners,
@@ -263,20 +270,22 @@ var helpers = (function() {
 })();
 
 
-var app = (function() {
 
+app = (function() {
 
   var
     config = {
       defFontName       : 'Times',
       defLetters        : 'HO',
       currentLayers     : '',
+      lettersIdPrefix   : '#layer-',
+      layersIdPrefix    : '#layer-preview-',
       pickedLayerNum    : -1,
       pickedLayerClass  : 'picked-layer',
       pickedLetterClass : 'picked-letter'
     },
     init, lettersToHtml, updateFontFaceStyle, updateLetters,
-    updateLayersPanel, layerClickListener;
+    updateLayersPanel, layerClickListener, letterClickListener;
 
 
   lettersToHtml = function(letters) {
@@ -320,25 +329,36 @@ var app = (function() {
   layerClickListener = function(layer_num) {
     // Emphasise picked layer
     helpers.toggleClass(
-      document.querySelector('#layer-preview-' + layer_num),
+      document.querySelector(
+        config.layersIdPrefix + layer_num),
       config.pickedLayerClass);
     // Move picked letter on the top
     helpers.toggleClass(
-      document.querySelector('#layer-' + layer_num),
+      document.querySelector(
+        config.lettersIdPrefix + layer_num),
       config.pickedLetterClass);
 
     // If user clicks on preview picked earlier
-    if (config.pickedLayerNum === layer_num)
-      config.pickedLayerNum = -1;
+    if (config.pickedLayerNum === layer_num) {
 
-    else {
+      config.pickedLayerNum = -1;
+      app.dnd.destroy();
+
+    } else {
+
+      app.dnd.init(
+        document.querySelector(config.lettersIdPrefix + layer_num));
+
       // Remove an emphasise form elements picked earlier if necessary
       if (config.pickedLayerNum >= 0) {
         helpers.toggleClass(
-          document.querySelector('#layer-preview-' + config.pickedLayerNum),
+          document.querySelector(
+            config.layersIdPrefix + config.pickedLayerNum),
           config.pickedLayerClass);
+
         helpers.toggleClass(
-          document.querySelector('#layer-' + config.pickedLayerNum),
+          document.querySelector(
+            config.lettersIdPrefix + config.pickedLayerNum),
           config.pickedLetterClass);
       }
 
@@ -384,6 +404,76 @@ var app = (function() {
 
   return { init : init}
 })();
+
+
+
+app.dnd = (function() {
+  var
+    config = {
+      element   : undefined,
+      draggable : false,
+      startX    : 0,
+      diff      : 0
+    },
+
+    init, destroy, mouseDown, mouseMove, mouseUp, dragStart;
+
+
+  mouseDown = function(event) {
+    event.preventDefault();
+    var style = window.getComputedStyle(config.element),
+        left = style.getPropertyValue('left');
+
+    config.draggable = true;
+    helpers.toggleClass(config.element, 'grabbing');
+
+    config.element.addEventListener('dragstart', dragStart);
+    document.addEventListener('mousemove', mouseMove);
+    config.element.addEventListener('mouseup', mouseUp);
+
+    config.startX = event.clientX;
+    config.diff = event.clientX - parseInt(left);
+  }
+
+  mouseMove = function(event) {
+    if (config.draggable) {
+      var currX = event.clientX;
+      config.element.style.left = event.clientX - config.diff + 'px';
+    }
+  }
+
+  mouseUp = function(event) {
+    config.draggable = false;
+    helpers.toggleClass(config.element, 'grabbing');
+
+    config.element.removeEventListener('dragstart', dragStart);
+    document.removeEventListener('mousemove', mouseMove);
+    config.element.removeEventListener('mouseup', mouseUp);
+  }
+
+  dragStart = function() {
+    event.preventDefault();
+    return false;
+  }
+
+  init = function(elem) {
+    if (config.element) destroy();
+
+    config.element = elem;
+    config.element.addEventListener('mousedown', mouseDown);
+  }
+
+  destroy = function() {
+    config.element.removeEventListener('mousedown', mouseDown);
+    config.element = undefined;
+  }
+
+  return {
+    init    : init,
+    destroy : destroy
+  }
+})();
+
 
 
 (function() { window.onload = function() { app.init(); } }).call();
