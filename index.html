@@ -285,7 +285,8 @@ app = (function() {
       pickedLetterClass : 'picked-letter'
     },
     init, lettersToHtml, updateFontFaceStyle, updateLetters,
-    updateLayersPanel, layerClickListener, letterClickListener;
+    updateLayersPanel, layerClickListener, letterClickListener,
+    resetLayers;
 
 
   lettersToHtml = function(letters) {
@@ -367,6 +368,26 @@ app = (function() {
   }
 
 
+  resetLayers = function() {
+
+    if (config.pickedLayerNum >= 0) {
+      app.dnd.destroy();
+
+      helpers.toggleClass(
+        document.querySelector(
+          config.layersIdPrefix + config.pickedLayerNum),
+        config.pickedLayerClass);
+
+      helpers.toggleClass(
+        document.querySelector(
+          config.lettersIdPrefix + config.pickedLayerNum),
+        config.pickedLetterClass);
+
+      config.pickedLayerNum = -1;
+    }
+  }
+
+
   updateLetters = function() {
     var letters = DOM.id('#input-letters').value;
 
@@ -399,6 +420,8 @@ app = (function() {
       'input', updateFontFaceStyle);
     DOM.id('#input-letters').addEventListener(
       'input', updateLetters);
+    DOM.id('#input-letters').addEventListener(
+      'focus', resetLayers);
   }
 
 
