@@ -286,7 +286,7 @@ app = (function() {
     },
     init, lettersToHtml, updateFontFaceStyle, updateLetters,
     updateLayersPanel, layerClickListener, letterClickListener,
-    resetLayers;
+    resetLayers, centerLetters;
 
 
   lettersToHtml = function(letters) {
@@ -306,6 +306,7 @@ app = (function() {
 
   updateFontFaceStyle = function() {
     document.body.style.fontFamily = DOM.id('#input-font-name').value;
+    if (config.pickedLayerNum < 0) centerLetters(config.currentLayers);
   }
 
 
@@ -388,11 +389,22 @@ app = (function() {
   }
 
 
+  centerLetters = function(letters) {
+    var halfOfWinW = window.innerWidth / 2;
+    for (var i = 0, l = letters.length; i < l; i++) {
+      var letter = document.querySelector(config.lettersIdPrefix + i);
+      letter.style.left =
+        ((halfOfWinW - letter.offsetWidth / 2) | 0) + 'px';
+    };
+  }
+
+
   updateLetters = function() {
     var letters = DOM.id('#input-letters').value;
 
     DOM.id('#content-letters').innerHTML =
       lettersToHtml(letters);
+    centerLetters(letters);
 
     helpers.removeEventListeners(config.currentLayers.length,
       layerClickListener);
@@ -410,6 +422,7 @@ app = (function() {
 
     DOM.id('#content-letters').innerHTML =
       lettersToHtml(config.defLetters);
+    centerLetters(config.defLetters);
 
     DOM.id('#panel-right').innerHTML =
       updateLayersPanel(config.defLetters);
